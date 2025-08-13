@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MobilePairCard } from "@/components/MobilePairCard";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +34,8 @@ interface MobilePairsListProps {
   onDelete: (id: string) => void;
   onToggleStatus: (id: string) => void;
   onAdd: () => void;
+  onClone?: (id: string) => void;
+  canAdd: boolean;
   searchTerm: string;
   onSearchChange: (value: string) => void;
 }
@@ -45,6 +46,8 @@ export function MobilePairsList({
   onDelete,
   onToggleStatus,
   onAdd,
+  onClone,
+  canAdd,
   searchTerm,
   onSearchChange
 }: MobilePairsListProps) {
@@ -189,7 +192,7 @@ export function MobilePairsList({
           <h2 className="text-lg font-semibold">
             Pairs ({filteredPairs.length})
           </h2>
-          <Button onClick={onAdd} size="sm">
+          <Button onClick={onAdd} size="sm" disabled={!canAdd}>
             <Plus className="w-4 h-4 mr-2" />
             Add
           </Button>
@@ -204,7 +207,7 @@ export function MobilePairsList({
                   : "No pairs found matching your criteria"}
               </p>
               {pairs.length === 0 && (
-                <Button onClick={onAdd} className="mt-4">
+                <Button onClick={onAdd} className="mt-4" disabled={!canAdd}>
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Pair
                 </Button>
@@ -219,6 +222,7 @@ export function MobilePairsList({
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleStatus={onToggleStatus}
+              onClone={onClone}
             />
           ))
         )}
