@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AutoForwardX Design System - Dark Theme Dashboard */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* AutoForwardX Design Tokens */
+    --background-body: 13 15% 6.3%; /* #0F1114 */
+    --background-surface: 11 14% 11.2%; /* #1B1F23 */
+    --background-panel: 0 0% 7.1%; /* #121315 */
+    --accent-primary: 191 100% 42.4%; /* #00B4D8 */
+    --text-primary: 210 20% 90.2%; /* #E6EEF3 */
+    --text-secondary: 220 9% 62%; /* #9CA3AF */
+    --status-success: 142 71% 45%; /* #22C55E */
+    --status-warning: 36 84% 50%; /* #F59E0B */
+    --status-error: 0 84% 60%; /* #EF4444 */
+    --border-default: 12 13% 15.3%; /* #23272B */
+    
+    /* Semantic tokens */
+    --background: var(--background-body);
+    --foreground: var(--text-primary);
+    --card: var(--background-surface);
+    --card-foreground: var(--text-primary);
+    --popover: var(--background-surface);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--accent-primary);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--background-surface);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--background-panel);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--accent-primary);
+    --accent-foreground: 0 0% 100%;
+    --destructive: var(--status-error);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--border-default);
+    --input: var(--background-surface);
+    --ring: var(--accent-primary);
+    --radius: 0.75rem; /* 12px for cards */
+    
+    /* Sidebar specific */
+    --sidebar-background: var(--background-panel);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: var(--accent-primary);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--background-surface);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-default);
+    --sidebar-ring: var(--accent-primary);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  
+  /* Remove default animations per requirements */
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  }
+}
+
+/* Mobile-first responsive utilities */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Mobile optimizations */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobile-form-spacing {
+    @apply space-y-4 p-4;
+  }
+  
+  .mobile-card-padding {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .mobile-text-size {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-button-full {
+    @apply w-full sm:w-auto;
+  }
+  
+  .mobile-grid-stack {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .mobile-flex-stack {
+    @apply flex flex-col sm:flex-row;
+  }
+}

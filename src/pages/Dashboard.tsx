@@ -1,0 +1,171 @@
+import { MetricCard } from "@/components/MetricCard";
+import { SystemHealthCard } from "@/components/SystemHealthCard";
+import { QuickActionsCard } from "@/components/QuickActionsCard";
+import { RecentActivityCard } from "@/components/RecentActivityCard";
+import { MobileStatsCard } from "@/components/MobileStatsCard";
+import { useNavigate } from "react-router-dom";
+import { 
+  RefreshCcw, 
+  Smartphone, 
+  Activity, 
+  CreditCard,
+  MessageSquare
+} from "lucide-react";
+
+export default function Dashboard() {
+  const navigate = useNavigate();
+  
+  // Mobile stats data
+  const stats = [
+    {
+      title: "Active Pairs",
+      value: "12",
+      description: "5 running, 7 paused",
+      icon: RefreshCcw,
+      trend: { value: "+2 this week", isPositive: true }
+    },
+    {
+      title: "Messages Today",
+      value: "1,247",
+      description: "Successfully forwarded",
+      icon: MessageSquare,
+      trend: { value: "↑ 12% from yesterday", isPositive: true }
+    },
+    {
+      title: "Active Sessions",
+      value: "3",
+      description: "All connected",
+      icon: Smartphone,
+      trend: { value: "All healthy", isPositive: true }
+    },
+    {
+      title: "Subscription",
+      value: "Pro Plan",
+      description: "Expires Dec 2024",
+      icon: CreditCard,
+    }
+  ];
+  
+  // Mock recent activity data
+  const recentEvents = [
+    {
+      id: "1",
+      type: "success" as const,
+      message: "Message forwarded successfully",
+      timestamp: new Date(Date.now() - 5 * 60 * 1000),
+      pairName: "News → Private"
+    },
+    {
+      id: "2", 
+      type: "success" as const,
+      message: "Pair created and activated",
+      timestamp: new Date(Date.now() - 15 * 60 * 1000),
+      pairName: "Tech Updates"
+    },
+    {
+      id: "3",
+      type: "error" as const,
+      message: "Failed to forward: destination unreachable",
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+      pairName: "Breaking News"
+    },
+    {
+      id: "4",
+      type: "paused" as const,
+      message: "Pair paused by user",
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      pairName: "Updates Feed"
+    }
+  ];
+
+  const handleAddPair = () => {
+    navigate("/pairs");
+  };
+
+  const handleViewPairs = () => {
+    navigate("/pairs");
+  };
+
+  const handleManageSessions = () => {
+    navigate("/sessions");
+  };
+
+  const handleUpgradePlan = () => {
+    navigate("/subscription");
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Monitor your Telegram forwarding activity and system health
+        </p>
+      </div>
+
+      {/* Mobile Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+        {stats.map((stat, index) => (
+          <MobileStatsCard key={index} {...stat} />
+        ))}
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard
+          icon={<RefreshCcw className="w-5 h-5" />}
+          value={12}
+          label="Active Pairs"
+          subtitle="5 running, 7 paused"
+        />
+        
+        <MetricCard
+          icon={<Smartphone className="w-5 h-5" />}
+          value={3}
+          label="Active Sessions"
+          subtitle="All connected"
+        />
+        
+        <MetricCard
+          icon={<MessageSquare className="w-5 h-5" />}
+          value="1,247"
+          label="Messages Today"
+          subtitle="↑ 12% from yesterday"
+        />
+        
+        <MetricCard
+          icon={<CreditCard className="w-5 h-5" />}
+          value="Pro Plan"
+          label="Subscription"
+          subtitle="Expires Dec 2024"
+        />
+      </div>
+
+      {/* System Health Card - Hidden on mobile */}
+      <div className="max-w-sm hidden md:block">
+        <SystemHealthCard
+          status="operational"
+          message="All workers active"
+        />
+      </div>
+
+      {/* Quick Actions + Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Actions */}
+        <div>
+          <QuickActionsCard
+            onAddPair={handleAddPair}
+            onViewPairs={handleViewPairs}
+            onManageSessions={handleManageSessions}
+            onUpgradePlan={handleUpgradePlan}
+          />
+        </div>
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-2">
+          <RecentActivityCard events={recentEvents} />
+        </div>
+      </div>
+    </div>
+  );
+}
