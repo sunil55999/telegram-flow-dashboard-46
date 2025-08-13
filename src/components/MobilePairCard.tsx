@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Edit, Trash2, ChevronDown, ChevronUp, MoreVertical } from "lucide-react";
+import { Edit, Trash2, ChevronDown, ChevronUp, MoreVertical, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ForwardingPair {
@@ -21,9 +22,10 @@ interface MobilePairCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (id: string) => void;
+  onClone?: (id: string) => void;
 }
 
-export function MobilePairCard({ pair, onEdit, onDelete, onToggleStatus }: MobilePairCardProps) {
+export function MobilePairCard({ pair, onEdit, onDelete, onToggleStatus, onClone }: MobilePairCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusInfo = (status: string) => {
@@ -78,6 +80,12 @@ export function MobilePairCard({ pair, onEdit, onDelete, onToggleStatus }: Mobil
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
+                  {onClone && (
+                    <DropdownMenuItem onClick={() => onClone(pair.id)}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Clone
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem 
                     onClick={() => onDelete(pair.id)}
                     className="text-destructive"
