@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddPairModal } from "@/components/AddPairModal";
 import { MobilePairsList } from "@/components/MobilePairsList";
-import { Plus, Edit, Trash2, Play, Pause, Search } from "lucide-react";
+import { FeatureLock } from "@/components/FeatureLock";
+import { usePlan } from "@/contexts/PlanContext";
+import { Plus, Edit, Trash2, Play, Pause, Search, Copy, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export default function Pairs() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { currentPlan, features, limits, canCreatePair } = usePlan();
   
   const [pairs, setPairs] = useState<ForwardingPair[]>([
     {
@@ -84,7 +86,50 @@ export default function Pairs() {
   );
 
   const handleAddPair = () => {
+    if (!canCreatePair()) {
+      toast({
+        title: "Limit Reached",
+        description: `You've reached your plan limit of ${features.maxPairs} pairs. Upgrade to create more.`,
+        variant: "destructive"
+      });
+      return;
+    }
     setIsAddModalOpen(true);
+  };
+
+  const handleClonePair = (pairId: string) => {
+    if (!features.cloning) {
+      toast({
+        title: "Feature Locked",
+        description: "Cloning requires Basic plan or higher.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!canCreatePair()) {
+      toast({
+        title: "Limit Reached", 
+        description: `You've reached your plan limit of ${features.maxPairs} pairs.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const originalPair = pairs.find(p => p.id === pairId);
+    if (originalPair) {
+      const clonedPair: ForwardingPair = {
+        ...originalPair,
+        id: Date.now().toString(),
+        name: `${originalPair.name} (Copy)`,
+        status: "paused"
+      };
+      setPairs(prev => [...prev, clonedPair]);
+      toast({
+        title: "Pair Cloned",
+        description: `Successfully cloned "${originalPair.name}"`,
+      });
+    }
   };
 
   const handleSavePair = (pairData: any) => {
@@ -157,22 +202,52 @@ export default function Pairs() {
     }
   };
 
+  const getUsageDisplay = () => {
+    if (features.maxPairs === -1) return `${filteredPairs.length} pairs`;
+    return `${filteredPairs.length} / ${features.maxPairs} pairs`;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="mobile-flex-stack items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">Forwarding Pairs</h1>
           <p className="text-muted-foreground mobile-text-size">
-            Manage your telegram channel forwarding configurations
+            Manage your telegram channel forwarding configurations ({getUsageDisplay()})
           </p>
         </div>
         {!isMobile && (
-          <Button onClick={handleAddPair}>
+          <Button 
+            onClick={handleAddPair}
+            disabled={!canCreatePair()}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Pair
+            {!canCreatePair() && <Lock className="w-4 h-4 ml-2" />}
           </Button>
         )}
       </div>
+
+      {/* Plan Limit Warning */}
+      {!canCreatePair() && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-amber-600" />
+              <p className="text-sm">
+                You've reached your plan limit of {features.maxPairs} pairs. 
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto ml-1"
+                  onClick={() => navigate('/subscription')}
+                >
+                  Upgrade to create more pairs
+                </Button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Mobile View */}
       {isMobile ? (
@@ -182,6 +257,8 @@ export default function Pairs() {
           onDelete={handleDeletePair}
           onToggleStatus={handleToggleStatus}
           onAdd={handleAddPair}
+          onClone={features.cloning ? handleClonePair : undefined}
+          canAdd={canCreatePair()}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
@@ -258,6 +335,25 @@ export default function Pairs() {
                                 <p>Edit pair</p>
                               </TooltipContent>
                             </Tooltip>
+
+                            {features.cloning && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleClonePair(pair.id)}
+                                    disabled={!canCreatePair()}
+                                    aria-label={`Clone pair ${pair.name}`}
+                                  >
+                                    <Copy className="w-4 h-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Clone pair</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                             
                             <Tooltip>
                               <TooltipTrigger asChild>
