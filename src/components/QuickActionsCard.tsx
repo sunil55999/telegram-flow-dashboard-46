@@ -11,6 +11,8 @@ interface QuickActionsCardProps {
   onManageSessions: () => void;
   onUpgradePlan: () => void;
   onManageFilters?: () => void;
+  canCreatePair?: boolean;
+  canManageFilters?: boolean;
 }
 
 export function QuickActionsCard({ 
@@ -18,12 +20,13 @@ export function QuickActionsCard({
   onViewPairs, 
   onManageSessions, 
   onUpgradePlan,
-  onManageFilters
+  onManageFilters,
+  canCreatePair = true,
+  canManageFilters = false
 }: QuickActionsCardProps) {
   const navigate = useNavigate();
-  const { canCreatePair, isFeatureAvailable, currentPlan } = usePlan();
+  const { isFeatureAvailable, currentPlan } = usePlan();
   
-  const canManageFilters = isFeatureAvailable('filters');
   const showUpgradeButton = currentPlan !== 'pro';
   
   return (
@@ -37,12 +40,12 @@ export function QuickActionsCard({
             className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
             variant="outline"
             onClick={onAddPair}
-            disabled={!canCreatePair()}
+            disabled={!canCreatePair}
             aria-label="Add new forwarding pair"
           >
             <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
             <span>Add Pair</span>
-            {!canCreatePair() && <Lock className="w-4 h-4 ml-auto" />}
+            {!canCreatePair && <Lock className="w-4 h-4 ml-auto" />}
           </Button>
           
           <Button 

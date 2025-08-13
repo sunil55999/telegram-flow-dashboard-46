@@ -17,6 +17,7 @@ import {
   Edit,
   Trash2,
   MoreVertical,
+  Lock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -373,7 +374,7 @@ export default function Pairs() {
             className="pl-10"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(value: "all" | Pair["status"]) => setStatusFilter(value)}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -407,7 +408,7 @@ export default function Pairs() {
           <CardContent>
             {filteredPairs.length === 0 ? (
               <div className="text-center py-8">
-                <RefreshCw className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <RefreshCcw className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                 <h3 className="text-lg font-medium mb-2">No pairs found</h3>
                 <p className="text-muted-foreground mb-4">
                   {searchTerm || statusFilter !== 'all'
