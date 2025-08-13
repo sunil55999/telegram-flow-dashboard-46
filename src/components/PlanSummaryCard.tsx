@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Crown, Users, RefreshCw, Zap, Calendar, TrendingUp, Smartphone } from "lucide-react";
+import { Crown, Users, RefreshCw, Zap, Calendar, TrendingUp } from "lucide-react";
 import { usePlan, PlanType } from "@/contexts/PlanContext";
 import { useNavigate } from "react-router-dom";
 
@@ -114,25 +114,6 @@ export function PlanSummaryCard() {
             )}
           </div>
 
-          {/* Telegram Accounts */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-muted-foreground" />
-                <span>Telegram Accounts</span>
-              </div>
-              <span className="font-medium">
-                {formatUsage(limits.telegramAccountsUsed, features.maxTelegramAccounts)}
-              </span>
-            </div>
-            {features.maxTelegramAccounts !== -1 && (
-              <Progress 
-                value={getUsagePercentage(limits.telegramAccountsUsed, features.maxTelegramAccounts)} 
-                className="h-2"
-              />
-            )}
-          </div>
-
           {/* Redirections Usage - Basic+ */}
           {currentPlan !== 'free' && (
             <div className="space-y-2">
@@ -180,7 +161,7 @@ export function PlanSummaryCard() {
         {currentPlan === 'free' && (
           <div className="p-3 rounded-md bg-muted/50 border-l-4 border-primary">
             <p className="text-sm text-muted-foreground">
-              Upgrade for edit/delete pairs, cloning, and advanced features.
+              Upgrade for unlimited pairs, advanced filters, and premium features.
             </p>
           </div>
         )}

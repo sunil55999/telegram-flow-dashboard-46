@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { FeatureLock } from "@/components/FeatureLock";
 import { 
   User, 
   Bell, 
@@ -14,19 +14,15 @@ import {
   Save, 
   Copy, 
   RefreshCw,
-  Shield,
-  Palette,
-  Languages
+  Shield
 } from "lucide-react";
 import { MobileSettingsSection } from "@/components/MobileSettingsSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { usePlan } from "@/contexts/PlanContext";
 
 export default function Settings() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const { currentPlan, isFeatureAvailable } = usePlan();
   
   const [profile, setProfile] = useState({
     name: "John Doe",
@@ -274,56 +270,6 @@ export default function Settings() {
     </div>
   );
 
-  const WatermarkContent = () => (
-    <div className="mobile-form-spacing">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5 pr-4">
-            <Label htmlFor="enableWatermark" className="text-sm font-medium">Enable Watermark</Label>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Add watermark to forwarded messages
-            </p>
-          </div>
-          <Switch id="enableWatermark" />
-        </div>
-        
-        <div className="space-y-2">
-          <Label>Watermark Text</Label>
-          <Input
-            placeholder="Via AutoForwardX"
-            className="bg-input border-border"
-          />
-        </div>
-      </div>
-    </div>
-  );
-
-  const TranslateContent = () => (
-    <div className="mobile-form-spacing">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5 pr-4">
-            <Label htmlFor="autoTranslate" className="text-sm font-medium">Auto Translate</Label>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Automatically translate messages
-            </p>
-          </div>
-          <Switch id="autoTranslate" />
-        </div>
-        
-        <div className="space-y-2">
-          <Label>Target Language</Label>
-          <select className="w-full px-3 py-2 rounded-md border border-input bg-background">
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  );
-
   const AccountContent = () => (
     <div className="mobile-form-spacing">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -390,37 +336,6 @@ export default function Settings() {
             <ApiKeyContent />
           </MobileSettingsSection>
 
-          {/* Pro Plan Features */}
-          {isFeatureAvailable('watermark') ? (
-            <MobileSettingsSection title="Watermark Settings" icon={Palette}>
-              <WatermarkContent />
-            </MobileSettingsSection>
-          ) : (
-            <MobileSettingsSection title="Watermark Settings" icon={Palette}>
-              <FeatureLock
-                requiredPlan="pro"
-                title="Watermark Settings"
-                description="Customize message watermarks with Pro plan"
-                variant="inline"
-              />
-            </MobileSettingsSection>
-          )}
-
-          {isFeatureAvailable('translate') ? (
-            <MobileSettingsSection title="Translation Settings" icon={Languages}>
-              <TranslateContent />
-            </MobileSettingsSection>
-          ) : (
-            <MobileSettingsSection title="Translation Settings" icon={Languages}>
-              <FeatureLock
-                requiredPlan="pro"
-                title="Translation Settings"
-                description="Auto-translate messages with Pro plan"
-                variant="inline"
-              />
-            </MobileSettingsSection>
-          )}
-
           <MobileSettingsSection title="Account Information" icon={Shield}>
             <AccountContent />
           </MobileSettingsSection>
@@ -463,47 +378,6 @@ export default function Settings() {
               <ApiKeyContent />
             </CardContent>
           </Card>
-
-          {/* Pro Plan Features */}
-          {isFeatureAvailable('watermark') ? (
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Watermark Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <WatermarkContent />
-              </CardContent>
-            </Card>
-          ) : (
-            <FeatureLock
-              requiredPlan="pro"
-              title="Watermark Settings"
-              description="Customize message watermarks and branding with Pro plan"
-            />
-          )}
-
-          {isFeatureAvailable('translate') ? (
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Languages className="w-5 h-5" />
-                  Translation Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TranslateContent />
-              </CardContent>
-            </Card>
-          ) : (
-            <FeatureLock
-              requiredPlan="pro"
-              title="Translation Settings"  
-              description="Auto-translate messages between languages with Pro plan"
-            />
-          )}
 
           <Card className="bg-card border-border">
             <CardHeader>

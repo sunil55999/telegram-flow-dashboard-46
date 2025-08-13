@@ -1,533 +1,431 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AddPairModal } from "@/components/AddPairModal";
+import { MobilePairsList } from "@/components/MobilePairsList";
 import { FeatureLock } from "@/components/FeatureLock";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useNavigate } from "react-router-dom";
-import {
-  Plus,
-  RefreshCcw,
-  Search,
-  Copy,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Lock,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePlan } from "@/contexts/PlanContext";
+import { Plus, Edit, Trash2, Play, Pause, Search, Copy, Crown, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-interface Pair {
+interface ForwardingPair {
   id: string;
   name: string;
-  source: string;
-  destination: string;
-  status: 'active' | 'paused' | 'error';
-}
-
-function getStatusVariant(status: Pair['status']) {
-  switch (status) {
-    case 'active': return "default";
-    case 'paused': return "secondary";
-    case 'error': return "destructive";
-    default: return "outline";
-  }
-}
-
-interface MobilePairsListProps {
-  pairs: Pair[];
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onToggleStatus: (id: string) => void;
-  onClone?: (id: string) => void;
-  onAdd: () => void;
-  canAdd: boolean;
-  searchTerm: string;
-  onSearchChange: (term: string) => void;
-}
-
-function MobilePairsList({
-  pairs,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  onClone,
-  onAdd,
-  canAdd,
-  searchTerm,
-  onSearchChange
-}: MobilePairsListProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>All Pairs ({pairs.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {pairs.length === 0 ? (
-          <div className="text-center py-8">
-            <RefreshCcw className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-medium mb-2">No pairs found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm
-                ? "Try adjusting your search."
-                : "Create your first forwarding pair to get started."
-              }
-            </p>
-            {canAdd && (
-              <Button onClick={onAdd}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Pair
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {pairs.map((pair) => (
-              <div
-                key={pair.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={pair.status === 'active'}
-                      onCheckedChange={() => onToggleStatus(pair.id)}
-                    />
-                    <div>
-                      <h4 className="font-medium">{pair.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {pair.source} → {pair.destination}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <Badge variant={getStatusVariant(pair.status)}>
-                    {pair.status}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {onClone && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onClone(pair.id)}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(pair.id)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(pair.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>View Logs</DropdownMenuItem>
-                      <DropdownMenuItem>Export Config</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+  sourceChannelId: string;
+  destinationChannelId: string;
+  status: "active" | "paused" | "error";
+  advancedFilters: boolean;
 }
 
 export default function Pairs() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { canCreatePair, canEditDeletePair, canClonePair, features, limits } = usePlan();
+  const { currentPlan, features, limits, canCreatePair } = usePlan();
   
-  const [pairs, setPairs] = useState<Pair[]>([
+  const [pairs, setPairs] = useState<ForwardingPair[]>([
     {
       id: "1",
-      name: "Telegram Channel to Discord",
-      source: "Telegram Channel A",
-      destination: "Discord Channel B",
-      status: 'active'
+      name: "News → Private",
+      sourceChannelId: "@newschannel",
+      destinationChannelId: "@privatechannel",
+      status: "active",
+      advancedFilters: false,
     },
     {
       id: "2",
-      name: "Telegram Group to Slack",
-      source: "Telegram Group C",
-      destination: "Slack Channel D",
-      status: 'paused'
+      name: "Updates Feed",
+      sourceChannelId: "@updates",
+      destinationChannelId: "@myupdates",
+      status: "paused",
+      advancedFilters: true,
     },
     {
       id: "3",
-      name: "Telegram Alerts to Email",
-      source: "Telegram Alerts Channel",
-      destination: "alerts@example.com",
-      status: 'active'
-    }
+      name: "Tech News",
+      sourceChannelId: "@technews",
+      destinationChannelId: "@mytechnews",
+      status: "active",
+      advancedFilters: false,
+    },
   ]);
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | Pair["status"]>("all");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; pairId?: string; pairName?: string }>({
+    open: false
+  });
 
-  const handleEdit = (pairId: string) => {
-    if (!canEditDeletePair()) {
-      toast({
-        title: "Feature Locked",
-        description: "Editing pairs requires Basic plan or higher",
-        variant: "destructive"
-      });
-      return;
-    }
-    navigate(`/pairs/edit/${pairId}`);
-  };
+  const filteredPairs = pairs.filter(pair => 
+    pair.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pair.sourceChannelId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pair.destinationChannelId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleDelete = (pairId: string) => {
-    if (!canEditDeletePair()) {
-      toast({
-        title: "Feature Locked",
-        description: "Deleting pairs requires Basic plan or higher",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setPairs(prev => prev.filter(p => p.id !== pairId));
-    toast({
-      title: "Pair deleted",
-      description: "The forwarding pair has been removed."
-    });
-  };
-
-  const handleClone = (pairId: string) => {
-    if (!canClonePair()) {
-      toast({
-        title: "Feature Locked",
-        description: "Cloning pairs requires Basic plan or higher",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const pairToClone = pairs.find(p => p.id === pairId);
-    if (!pairToClone) return;
-
+  const handleAddPair = () => {
     if (!canCreatePair()) {
       toast({
         title: "Limit Reached",
-        description: `You've reached the maximum number of pairs (${features.maxPairs})`,
+        description: `You've reached your plan limit of ${features.maxPairs} pairs. Upgrade to create more.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsAddModalOpen(true);
+  };
+
+  const handleClonePair = (pairId: string) => {
+    if (!features.cloning) {
+      toast({
+        title: "Feature Locked",
+        description: "Cloning requires Basic plan or higher.",
         variant: "destructive"
       });
       return;
     }
 
-    const clonedPair = {
-      ...pairToClone,
-      id: Date.now().toString(),
-      name: `${pairToClone.name} (Copy)`,
-      status: 'paused' as const
-    };
+    if (!canCreatePair()) {
+      toast({
+        title: "Limit Reached", 
+        description: `You've reached your plan limit of ${features.maxPairs} pairs.`,
+        variant: "destructive"
+      });
+      return;
+    }
 
-    setPairs(prev => [...prev, clonedPair]);
+    const originalPair = pairs.find(p => p.id === pairId);
+    if (originalPair) {
+      const clonedPair: ForwardingPair = {
+        ...originalPair,
+        id: Date.now().toString(),
+        name: `${originalPair.name} (Copy)`,
+        status: "paused"
+      };
+      setPairs(prev => [...prev, clonedPair]);
+      toast({
+        title: "Pair Cloned",
+        description: `Successfully cloned "${originalPair.name}"`,
+      });
+    }
+  };
+
+  const handleSavePair = (pairData: any) => {
+    const newPair: ForwardingPair = {
+      id: Date.now().toString(),
+      name: pairData.name || `${pairData.sourceInput} → ${pairData.destinationInput}`,
+      sourceChannelId: pairData.sourceInput,
+      destinationChannelId: pairData.destinationInput,
+      status: "active",
+      advancedFilters: pairData.enableFilters,
+    };
+    
+    setPairs(prev => [...prev, newPair]);
     toast({
-      title: "Pair cloned successfully",
-      description: `Created "${clonedPair.name}" from original pair`
+      title: "Pair Created",
+      description: `Successfully created forwarding pair "${newPair.name}"`,
     });
   };
 
-  const handleToggleStatus = (pairId: string) => {
-    setPairs(prev => prev.map(pair =>
-      pair.id === pairId
-        ? { ...pair, status: pair.status === 'active' ? 'paused' : 'active' }
+  const handleEditPair = (pairId: string) => {
+    navigate(`/pairs/${pairId}/edit`);
+  };
+
+  const handleToggleStatus = async (pairId: string) => {
+    setPairs(prev => prev.map(pair => 
+      pair.id === pairId 
+        ? { ...pair, status: pair.status === "active" ? "paused" : "active" }
         : pair
     ));
+    
+    const pair = pairs.find(p => p.id === pairId);
+    const newStatus = pair?.status === "active" ? "paused" : "active";
+    
+    toast({
+      title: `Pair ${newStatus === "active" ? "Resumed" : "Paused"}`,
+      description: `${pair?.name} is now ${newStatus}`,
+    });
   };
 
-  const handleAdd = () => {
-    navigate("/pairs/new");
+  const handleDeletePair = (pairId: string) => {
+    const pair = pairs.find(p => p.id === pairId);
+    setDeleteConfirm({ 
+      open: true, 
+      pairId, 
+      pairName: pair?.name 
+    });
   };
 
-  const filteredPairs = pairs.filter(pair => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const matchesSearch =
-      pair.name.toLowerCase().includes(searchTermLower) ||
-      pair.source.toLowerCase().includes(searchTermLower) ||
-      pair.destination.toLowerCase().includes(searchTermLower);
+  const confirmDelete = () => {
+    if (deleteConfirm.pairId) {
+      setPairs(prev => prev.filter(p => p.id !== deleteConfirm.pairId));
+      toast({
+        title: "Pair Deleted",
+        description: `Successfully deleted "${deleteConfirm.pairName}"`,
+      });
+    }
+    setDeleteConfirm({ open: false });
+  };
 
-    const matchesStatus = statusFilter === "all" || pair.status === statusFilter;
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case "active":
+        return { color: "text-green-500", bgColor: "bg-green-500", label: "Active" };
+      case "paused":
+        return { color: "text-yellow-500", bgColor: "bg-yellow-500", label: "Paused" };
+      case "error":
+        return { color: "text-red-500", bgColor: "bg-red-500", label: "Error" };
+      default:
+        return { color: "text-gray-500", bgColor: "bg-gray-500", label: "Unknown" };
+    }
+  };
 
-    return matchesSearch && matchesStatus;
-  });
-
-  const canEdit = canEditDeletePair();
-  const canDelete = canEditDeletePair();
-  const canClone = canClonePair();
+  const getUsageDisplay = () => {
+    if (features.maxPairs === -1) return `${filteredPairs.length} pairs`;
+    return `${filteredPairs.length} / ${features.maxPairs} pairs`;
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="mobile-flex-stack items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">Forwarding Pairs</h1>
           <p className="text-muted-foreground mobile-text-size">
-            Manage your message forwarding configurations
+            Manage your telegram channel forwarding configurations ({getUsageDisplay()})
           </p>
         </div>
-        <Button 
-          onClick={handleAdd}
-          disabled={!canCreatePair()}
-          className="mobile-button-full sm:w-auto"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Pair
-          {!canCreatePair() && <Lock className="w-4 h-4 ml-2" />}
-        </Button>
+        {!isMobile && (
+          <Button 
+            onClick={handleAddPair}
+            disabled={!canCreatePair()}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Pair
+            {!canCreatePair() && <Lock className="w-4 h-4 ml-2" />}
+          </Button>
+        )}
       </div>
 
-      {/* Usage Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
+      {/* Plan Limit Warning */}
+      {!canCreatePair() && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/20">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Pairs</p>
-                <p className="text-2xl font-bold">{pairs.length}</p>
-              </div>
-              <RefreshCcw className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <div className="mt-2">
-              <p className="text-xs text-muted-foreground">
-                {features.maxPairs === -1 
-                  ? "Unlimited" 
-                  : `${pairs.length} / ${features.maxPairs} used`
-                }
+            <div className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-amber-600" />
+              <p className="text-sm">
+                You've reached your plan limit of {features.maxPairs} pairs. 
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto ml-1"
+                  onClick={() => navigate('/subscription')}
+                >
+                  Upgrade to create more pairs
+                </Button>
               </p>
             </div>
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {pairs.filter(p => p.status === 'active').length}
-                </p>
-              </div>
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Paused</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {pairs.filter(p => p.status === 'paused').length}
-                </p>
-              </div>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search pairs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={(value: "all" | Pair["status"]) => setStatusFilter(value)}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="paused">Paused</SelectItem>
-            <SelectItem value="error">Error</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Pairs List */}
+      {/* Mobile View */}
       {isMobile ? (
         <MobilePairsList
-          pairs={filteredPairs}
-          onEdit={canEdit ? handleEdit : () => {}}
-          onDelete={canDelete ? handleDelete : () => {}}
+          pairs={pairs}
+          onEdit={handleEditPair}
+          onDelete={handleDeletePair}
           onToggleStatus={handleToggleStatus}
-          onAdd={handleAdd}
-          onClone={canClone ? handleClone : undefined}
+          onAdd={handleAddPair}
+          onClone={features.cloning ? handleClonePair : undefined}
           canAdd={canCreatePair()}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Pairs ({filteredPairs.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {filteredPairs.length === 0 ? (
-              <div className="text-center py-8">
-                <RefreshCcw className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-medium mb-2">No pairs found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchTerm || statusFilter !== 'all'
-                    ? "Try adjusting your search or filter criteria."
-                    : "Create your first forwarding pair to get started."
-                  }
-                </p>
-                {canCreatePair() && (
-                  <Button onClick={handleAdd}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Pair
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredPairs.map((pair) => (
-                  <div
-                    key={pair.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={pair.status === 'active'}
-                          onCheckedChange={() => handleToggleStatus(pair.id)}
-                        />
-                        <div>
-                          <h4 className="font-medium">{pair.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {pair.source} → {pair.destination}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <Badge variant={getStatusVariant(pair.status)}>
-                        {pair.status}
-                      </Badge>
-                    </div>
+        /* Desktop View */
+        <>
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search pairs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-                    <div className="flex items-center gap-2">
-                      {canClone && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleClone(pair.id)}
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      )}
-                      
-                      {canEdit ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(pair.id)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled
-                          className="opacity-50"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                      
-                      {canDelete ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(pair.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled
-                          className="opacity-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>View Logs</DropdownMenuItem>
-                          <DropdownMenuItem>Export Config</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          {/* Desktop Table */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Active Pairs ({filteredPairs.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead>Pair Name</TableHead>
+                    <TableHead>Source Channel ID</TableHead>
+                    <TableHead>Destination Channel ID</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPairs.map((pair) => {
+                    const statusInfo = getStatusInfo(pair.status);
+                    return (
+                      <TableRow 
+                        key={pair.id} 
+                        className="border-border hover:bg-muted/20 transition-colors"
+                      >
+                        <TableCell className="font-medium">{pair.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {pair.sourceChannelId}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {pair.destinationChannelId}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${statusInfo.bgColor}`}></div>
+                            <span className="capitalize text-sm">{statusInfo.label}</span>
+                            {pair.advancedFilters && (
+                              <Badge variant="outline" className="text-xs">
+                                Filtered
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditPair(pair.id)}
+                                  aria-label={`Edit pair ${pair.name}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            {features.cloning && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleClonePair(pair.id)}
+                                    disabled={!canCreatePair()}
+                                    aria-label={`Clone pair ${pair.name}`}
+                                  >
+                                    <Copy className="w-4 h-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Clone pair</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleStatus(pair.id)}
+                                  aria-label={`${pair.status === "active" ? "Pause" : "Resume"} pair ${pair.name}`}
+                                >
+                                  {pair.status === "active" ? (
+                                    <Pause className="w-4 h-4" />
+                                  ) : (
+                                    <Play className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{pair.status === "active" ? "Pause" : "Resume"} pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeletePair(pair.id)}
+                                  aria-label={`Delete pair ${pair.name}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
       )}
 
-      {/* Free Plan Upgrade Prompt */}
-      {!canEditDeletePair() && (
-        <FeatureLock
-          requiredPlan="basic"
-          title="Enhanced Pair Management"
-          description="Upgrade to Basic plan to edit, delete, and clone your forwarding pairs."
-          className="mt-6"
-        />
-      )}
+      {/* Add Pair Modal */}
+      <AddPairModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onSave={handleSavePair}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(open) => setDeleteConfirm({ open })}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Forwarding Pair</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteConfirm.pairName}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,47 +1,47 @@
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/sonner";
-import { PlanProvider } from "@/contexts/PlanContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import Index from "@/pages/Index";
-import Dashboard from "@/pages/Dashboard";
-import Pairs from "@/pages/Pairs";
-import NewPair from "@/pages/NewPair";
-import EditPair from "@/pages/EditPair";
-import Sessions from "@/pages/Sessions";
-import Filters from "@/pages/Filters";
-import Settings from "@/pages/Settings";
-import Logs from "@/pages/Logs";
-import Subscription from "@/pages/Subscription";
-import NotFound from "@/pages/NotFound";
-import "./App.css";
+import { PlanProvider } from "@/contexts/PlanContext";
+import Dashboard from "./pages/Dashboard";
+import Pairs from "./pages/Pairs";
+import EditPair from "./pages/EditPair";
+import Sessions from "./pages/Sessions";
+import Subscription from "./pages/Subscription";
+import Logs from "./pages/Logs";
+import Settings from "./pages/Settings";
+import Filters from "./pages/Filters";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
       <PlanProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/pairs" element={<Layout><Pairs /></Layout>} />
-            <Route path="/pairs/new" element={<Layout><NewPair /></Layout>} />
-            <Route path="/pairs/edit/:pairId" element={<Layout><EditPair /></Layout>} />
-            <Route path="/sessions" element={<Layout><Sessions /></Layout>} />
-            <Route path="/filters" element={<Layout><Filters /></Layout>} />
-            <Route path="/settings" element={<Layout><Settings /></Layout>} />
-            <Route path="/logs" element={<Layout><Logs /></Layout>} />
-            <Route path="/subscription" element={<Layout><Subscription /></Layout>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </Router>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/pairs" element={<Pairs />} />
+              <Route path="/pairs/:pairId/edit" element={<EditPair />} />
+              <Route path="/sessions" element={<Sessions />} />
+              <Route path="/subscription" element={<Subscription />} />
+              <Route path="/logs" element={<Logs />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/filters" element={<Filters />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
       </PlanProvider>
-    </QueryClientProvider>
-  );
-}
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
