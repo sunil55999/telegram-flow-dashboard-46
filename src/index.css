@@ -123,11 +123,11 @@
   
   /* Mobile safe areas */
   .mobile-safe-top {
-    @apply pt-safe-top;
+    @apply pt-4;
   }
   
   .mobile-safe-bottom {
-    @apply pb-safe-bottom pb-20 md:pb-6;
+    @apply pb-20 md:pb-6;
   }
   
   /* Hide scrollbar on mobile for better UX */
