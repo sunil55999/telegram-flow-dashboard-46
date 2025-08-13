@@ -7,6 +7,7 @@ export interface PlanFeatures {
   maxPairs: number;
   maxRedirections: number;
   maxMultiSetups: number;
+  maxTelegramAccounts: number;
   noAds: boolean;
   editDeleteReply: boolean;
   duplicateFiltering: boolean;
@@ -30,6 +31,7 @@ export interface PlanLimits {
   pairsUsed: number;
   redirectionsUsed: number;
   multiSetupsUsed: number;
+  telegramAccountsUsed: number;
 }
 
 interface PlanContextType {
@@ -38,8 +40,11 @@ interface PlanContextType {
   limits: PlanLimits;
   isFeatureAvailable: (feature: keyof PlanFeatures) => boolean;
   canCreatePair: () => boolean;
+  canEditDeletePair: () => boolean;
+  canClonePair: () => boolean;
   canUseRedirection: () => boolean;
   canUseMultiSetup: () => boolean;
+  canAddTelegramAccount: () => boolean;
   setPlan: (plan: PlanType) => void;
 }
 
@@ -48,6 +53,7 @@ const planConfigs: Record<PlanType, PlanFeatures> = {
     maxPairs: 5,
     maxRedirections: 0,
     maxMultiSetups: 0,
+    maxTelegramAccounts: 1,
     noAds: false,
     editDeleteReply: false,
     duplicateFiltering: false,
@@ -70,6 +76,7 @@ const planConfigs: Record<PlanType, PlanFeatures> = {
     maxPairs: 50,
     maxRedirections: 15,
     maxMultiSetups: 15,
+    maxTelegramAccounts: 1,
     noAds: true,
     editDeleteReply: true,
     duplicateFiltering: true,
@@ -92,6 +99,7 @@ const planConfigs: Record<PlanType, PlanFeatures> = {
     maxPairs: -1, // unlimited
     maxRedirections: -1,
     maxMultiSetups: -1,
+    maxTelegramAccounts: 1,
     noAds: true,
     editDeleteReply: true,
     duplicateFiltering: true,
@@ -114,6 +122,7 @@ const planConfigs: Record<PlanType, PlanFeatures> = {
     maxPairs: -1,
     maxRedirections: -1,
     maxMultiSetups: -1,
+    maxTelegramAccounts: 3,
     noAds: true,
     editDeleteReply: true,
     duplicateFiltering: true,
@@ -142,6 +151,7 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     pairsUsed: 3,
     redirectionsUsed: 8,
     multiSetupsUsed: 5,
+    telegramAccountsUsed: 1,
   });
 
   const features = planConfigs[currentPlan];
@@ -154,12 +164,24 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     return features.maxPairs === -1 || limits.pairsUsed < features.maxPairs;
   };
 
+  const canEditDeletePair = (): boolean => {
+    return features.editDeleteReply;
+  };
+
+  const canClonePair = (): boolean => {
+    return features.cloning;
+  };
+
   const canUseRedirection = (): boolean => {
     return features.maxRedirections === -1 || limits.redirectionsUsed < features.maxRedirections;
   };
 
   const canUseMultiSetup = (): boolean => {
     return features.maxMultiSetups === -1 || limits.multiSetupsUsed < features.maxMultiSetups;
+  };
+
+  const canAddTelegramAccount = (): boolean => {
+    return features.maxTelegramAccounts === -1 || limits.telegramAccountsUsed < features.maxTelegramAccounts;
   };
 
   const setPlan = (plan: PlanType) => {
@@ -173,8 +195,11 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
       limits,
       isFeatureAvailable,
       canCreatePair,
+      canEditDeletePair,
+      canClonePair,
       canUseRedirection,
       canUseMultiSetup,
+      canAddTelegramAccount,
       setPlan,
     }}>
       {children}

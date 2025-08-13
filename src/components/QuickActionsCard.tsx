@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Smartphone, CreditCard, RefreshCcw, TrendingUp, Settings, Filter, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePlan } from "@/contexts/PlanContext";
 
 interface QuickActionsCardProps {
   onAddPair: () => void;
@@ -10,8 +11,6 @@ interface QuickActionsCardProps {
   onManageSessions: () => void;
   onUpgradePlan: () => void;
   onManageFilters?: () => void;
-  canCreatePair: boolean;
-  canManageFilters: boolean;
 }
 
 export function QuickActionsCard({ 
@@ -19,11 +18,13 @@ export function QuickActionsCard({
   onViewPairs, 
   onManageSessions, 
   onUpgradePlan,
-  onManageFilters,
-  canCreatePair,
-  canManageFilters
+  onManageFilters
 }: QuickActionsCardProps) {
   const navigate = useNavigate();
+  const { canCreatePair, isFeatureAvailable, currentPlan } = usePlan();
+  
+  const canManageFilters = isFeatureAvailable('filters');
+  const showUpgradeButton = currentPlan !== 'pro';
   
   return (
     <Card className="bg-card border-border">
@@ -36,12 +37,12 @@ export function QuickActionsCard({
             className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
             variant="outline"
             onClick={onAddPair}
-            disabled={!canCreatePair}
+            disabled={!canCreatePair()}
             aria-label="Add new forwarding pair"
           >
             <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
             <span>Add Pair</span>
-            {!canCreatePair && <Lock className="w-4 h-4 ml-auto" />}
+            {!canCreatePair() && <Lock className="w-4 h-4 ml-auto" />}
           </Button>
           
           <Button 
@@ -107,15 +108,17 @@ export function QuickActionsCard({
             <span>Settings</span>
           </Button>
           
-          <Button 
-            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
-            variant="outline"
-            onClick={onUpgradePlan}
-            aria-label="Upgrade subscription plan"
-          >
-            <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
-            <span>Upgrade Plan</span>
-          </Button>
+          {showUpgradeButton && (
+            <Button 
+              className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+              variant="outline"
+              onClick={onUpgradePlan}
+              aria-label="Upgrade subscription plan"
+            >
+              <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span>Upgrade Plan</span>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
