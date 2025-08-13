@@ -1,9 +1,11 @@
+
 import { Sidebar, SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TopNavbar } from "@/components/TopNavbar";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const getPageTitle = () => {
     switch (location.pathname) {
@@ -34,6 +37,25 @@ export function Layout({ children }: LayoutProps) {
     }
   };
 
+  const showSearch = location.pathname === "/pairs" || location.pathname === "/logs";
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background w-full">
+        {/* Mobile Header */}
+        <MobileHeader title={getPageTitle()} showSearch={showSearch} />
+        
+        {/* Main Content */}
+        <main className="flex-1 p-4 mobile-safe-bottom overflow-y-auto">
+          {children}
+        </main>
+        
+        {/* Mobile Navigation */}
+        <MobileNavigation />
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -44,24 +66,13 @@ export function Layout({ children }: LayoutProps) {
         
         <SidebarInset className="flex-1">
           {/* Desktop Header */}
-          <div className="hidden md:block">
-            <TopNavbar />
-          </div>
-          
-          {/* Mobile Header */}
-          <MobileHeader 
-            title={getPageTitle()} 
-            showSearch={location.pathname === "/pairs" || location.pathname === "/logs"}
-          />
+          <TopNavbar />
           
           {/* Main Content */}
-          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
+          <main className="flex-1 p-6 pb-6">
             {children}
           </main>
         </SidebarInset>
-        
-        {/* Mobile Navigation */}
-        <MobileNavigation />
       </div>
     </SidebarProvider>
   );

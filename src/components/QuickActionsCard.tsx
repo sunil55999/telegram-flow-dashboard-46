@@ -1,6 +1,8 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Smartphone, CreditCard, RefreshCcw } from "lucide-react";
+import { Plus, Smartphone, CreditCard, RefreshCcw, TrendingUp, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface QuickActionsCardProps {
   onAddPair: () => void;
@@ -15,48 +17,75 @@ export function QuickActionsCard({
   onManageSessions, 
   onUpgradePlan 
 }: QuickActionsCardProps) {
+  const navigate = useNavigate();
+  
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-base">Quick Actions</CardTitle>
+        <CardTitle className="text-sm sm:text-base">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <Button 
-          className="w-full justify-start" 
-          variant="outline"
-          onClick={onAddPair}
-          aria-label="Add new forwarding pair"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Pair
-        </Button>
-        <Button 
-          className="w-full justify-start" 
-          variant="outline"
-          onClick={onViewPairs}
-          aria-label="View all forwarding pairs"
-        >
-          <RefreshCcw className="w-4 h-4 mr-2" />
-          View Pairs
-        </Button>
-        <Button 
-          className="w-full justify-start" 
-          variant="outline"
-          onClick={onManageSessions}
-          aria-label="Manage telegram sessions"
-        >
-          <Smartphone className="w-4 h-4 mr-2" />
-          Manage Sessions
-        </Button>
-        <Button 
-          className="w-full justify-start" 
-          variant="outline"
-          onClick={onUpgradePlan}
-          aria-label="Upgrade subscription plan"
-        >
-          <CreditCard className="w-4 h-4 mr-2" />
-          Upgrade Plan
-        </Button>
+      <CardContent className="mobile-form-spacing">
+        <div className="grid grid-cols-1 gap-2 sm:gap-3">
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={onAddPair}
+            aria-label="Add new forwarding pair"
+          >
+            <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>Add Pair</span>
+          </Button>
+          
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={onViewPairs}
+            aria-label="View all forwarding pairs"
+          >
+            <RefreshCcw className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>View Pairs</span>
+          </Button>
+          
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={onManageSessions}
+            aria-label="Manage telegram sessions"
+          >
+            <Smartphone className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>Manage Sessions</span>
+          </Button>
+          
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={() => navigate("/logs")}
+            aria-label="View activity logs"
+          >
+            <TrendingUp className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>View Logs</span>
+          </Button>
+          
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={() => navigate("/settings")}
+            aria-label="Open settings"
+          >
+            <Settings className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>Settings</span>
+          </Button>
+          
+          <Button 
+            className="w-full justify-start text-sm sm:text-base mobile-touch-target" 
+            variant="outline"
+            onClick={onUpgradePlan}
+            aria-label="Upgrade subscription plan"
+          >
+            <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>Upgrade Plan</span>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

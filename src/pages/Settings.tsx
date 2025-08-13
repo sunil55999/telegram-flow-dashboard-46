@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +18,11 @@ import {
 } from "lucide-react";
 import { MobileSettingsSection } from "@/components/MobileSettingsSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   const [profile, setProfile] = useState({
     name: "John Doe",
@@ -39,23 +42,36 @@ export default function Settings() {
   const [apiKey] = useState("afxp_sk_1234567890abcdef1234567890abcdef");
 
   const handleProfileSave = () => {
-    console.log("Saving profile...", profile);
+    toast({
+      title: "Profile Updated",
+      description: "Your profile settings have been saved successfully",
+    });
   };
 
   const handleNotificationSave = () => {
-    console.log("Saving notifications...", notifications);
+    toast({
+      title: "Preferences Saved",
+      description: "Your notification settings have been updated",
+    });
   };
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey);
+    toast({
+      title: "API Key Copied",
+      description: "Your API key has been copied to clipboard",
+    });
   };
 
   const handleRegenerateApiKey = () => {
-    console.log("Regenerating API key...");
+    toast({
+      title: "API Key Regenerated",
+      description: "Your new API key is now active. Update your applications.",
+    });
   };
 
   const ProfileContent = () => (
-    <div className="space-y-4">
+    <div className="mobile-form-spacing">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>
@@ -92,6 +108,7 @@ export default function Settings() {
             value={profile.currentPassword}
             onChange={(e) => setProfile({...profile, currentPassword: e.target.value})}
             className="bg-input border-border"
+            placeholder="Enter current password"
           />
         </div>
         
@@ -104,6 +121,7 @@ export default function Settings() {
               value={profile.newPassword}
               onChange={(e) => setProfile({...profile, newPassword: e.target.value})}
               className="bg-input border-border"
+              placeholder="Enter new password"
             />
           </div>
           
@@ -115,6 +133,7 @@ export default function Settings() {
               value={profile.confirmPassword}
               onChange={(e) => setProfile({...profile, confirmPassword: e.target.value})}
               className="bg-input border-border"
+              placeholder="Confirm new password"
             />
           </div>
         </div>
@@ -130,11 +149,11 @@ export default function Settings() {
   );
 
   const NotificationContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="emailNotifications">Email Notifications</Label>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-0.5 pr-4">
+          <Label htmlFor="emailNotifications" className="text-sm font-medium">Email Notifications</Label>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Receive email updates about your forwarding activity
           </p>
         </div>
@@ -148,9 +167,9 @@ export default function Settings() {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="pushNotifications">Push Notifications</Label>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-0.5 pr-4">
+          <Label htmlFor="pushNotifications" className="text-sm font-medium">Push Notifications</Label>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Receive browser notifications for important events
           </p>
         </div>
@@ -164,9 +183,9 @@ export default function Settings() {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="errorAlerts">Error Alerts</Label>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-0.5 pr-4">
+          <Label htmlFor="errorAlerts" className="text-sm font-medium">Error Alerts</Label>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Get notified immediately when forwarding fails
           </p>
         </div>
@@ -180,9 +199,9 @@ export default function Settings() {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="weeklyReports">Weekly Reports</Label>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-0.5 pr-4">
+          <Label htmlFor="weeklyReports" className="text-sm font-medium">Weekly Reports</Label>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Receive weekly summary of your forwarding statistics
           </p>
         </div>
@@ -205,28 +224,30 @@ export default function Settings() {
   );
 
   const ApiKeyContent = () => (
-    <div className="space-y-4">
+    <div className="mobile-form-spacing">
       <div className="space-y-2">
         <Label>Your API Key</Label>
         <div className="flex gap-2">
           <Input
             value={apiKey}
             readOnly
-            className="bg-muted border-border font-mono text-sm"
+            className="bg-muted border-border font-mono text-sm flex-1"
           />
-          <Button variant="outline" size="icon" onClick={handleCopyApiKey} className="mobile-touch-target">
+          <Button variant="outline" size="icon" onClick={handleCopyApiKey} className="mobile-touch-target flex-shrink-0">
             <Copy className="w-4 h-4" />
           </Button>
+        </div>
+        <div className="flex gap-2">
           <Button variant="outline" onClick={handleRegenerateApiKey} className="mobile-button-full">
             <RefreshCw className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Regenerate</span>
+            Regenerate Key
           </Button>
         </div>
       </div>
       
-      <div className="bg-muted/50 p-4 rounded-lg">
+      <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
         <div className="flex items-start gap-2">
-          <Shield className="w-4 h-4 text-yellow-500 mt-0.5" />
+          <Shield className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
           <div className="text-sm">
             <p className="font-medium text-yellow-500">Security Warning</p>
             <p className="text-muted-foreground mt-1">
@@ -250,7 +271,7 @@ export default function Settings() {
   );
 
   const AccountContent = () => (
-    <div className="space-y-4">
+    <div className="mobile-form-spacing">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label className="text-sm text-muted-foreground">Account ID</Label>
@@ -277,7 +298,7 @@ export default function Settings() {
 
       <Separator />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mobile-flex-stack justify-between items-start sm:items-center gap-4">
         <div>
           <h4 className="font-medium text-red-500">Danger Zone</h4>
           <p className="text-sm text-muted-foreground">
@@ -292,7 +313,7 @@ export default function Settings() {
   );
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground mobile-text-size">

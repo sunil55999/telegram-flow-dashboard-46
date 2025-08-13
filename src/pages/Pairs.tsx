@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,11 +23,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AddPairModal } from "@/components/AddPairModal";
-import { MobilePairCard } from "@/components/MobilePairCard";
+import { MobilePairsList } from "@/components/MobilePairsList";
 import { Plus, Edit, Trash2, Play, Pause, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ForwardingPair {
   id: string;
@@ -40,6 +42,7 @@ interface ForwardingPair {
 export default function Pairs() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const [pairs, setPairs] = useState<ForwardingPair[]>([
     {
@@ -155,156 +158,153 @@ export default function Pairs() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="mobile-flex-stack items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Forwarding Pairs</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">Forwarding Pairs</h1>
+          <p className="text-muted-foreground mobile-text-size">
             Manage your telegram channel forwarding configurations
           </p>
         </div>
-        <Button onClick={handleAddPair} className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Pair
-        </Button>
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Search pairs..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="md:hidden space-y-4">
-        {filteredPairs.length === 0 ? (
-          <Card className="bg-card border-border">
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No pairs found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredPairs.map((pair) => (
-            <MobilePairCard
-              key={pair.id}
-              pair={pair}
-              onEdit={handleEditPair}
-              onDelete={handleDeletePair}
-              onToggleStatus={handleToggleStatus}
-            />
-          ))
+        {!isMobile && (
+          <Button onClick={handleAddPair}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Pair
+          </Button>
         )}
       </div>
 
-      {/* Desktop Table */}
-      <Card className="bg-card border-border hidden md:block">
-        <CardHeader>
-          <CardTitle className="text-base">Active Pairs ({filteredPairs.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border">
-                <TableHead>Pair Name</TableHead>
-                <TableHead>Source Channel ID</TableHead>
-                <TableHead>Destination Channel ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPairs.map((pair) => {
-                const statusInfo = getStatusInfo(pair.status);
-                return (
-                  <TableRow 
-                    key={pair.id} 
-                    className="border-border hover:bg-muted/20 transition-colors"
-                  >
-                    <TableCell className="font-medium">{pair.name}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {pair.sourceChannelId}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {pair.destinationChannelId}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${statusInfo.bgColor}`}></div>
-                        <span className="capitalize text-sm">{statusInfo.label}</span>
-                        {pair.advancedFilters && (
-                          <Badge variant="outline" className="text-xs">
-                            Filtered
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditPair(pair.id)}
-                              aria-label={`Edit pair ${pair.name}`}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit pair</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleToggleStatus(pair.id)}
-                              aria-label={`${pair.status === "active" ? "Pause" : "Resume"} pair ${pair.name}`}
-                            >
-                              {pair.status === "active" ? (
-                                <Pause className="w-4 h-4" />
-                              ) : (
-                                <Play className="w-4 h-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{pair.status === "active" ? "Pause" : "Resume"} pair</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeletePair(pair.id)}
-                              aria-label={`Delete pair ${pair.name}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete pair</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
+      {/* Mobile View */}
+      {isMobile ? (
+        <MobilePairsList
+          pairs={pairs}
+          onEdit={handleEditPair}
+          onDelete={handleDeletePair}
+          onToggleStatus={handleToggleStatus}
+          onAdd={handleAddPair}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+      ) : (
+        /* Desktop View */
+        <>
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search pairs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Desktop Table */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Active Pairs ({filteredPairs.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead>Pair Name</TableHead>
+                    <TableHead>Source Channel ID</TableHead>
+                    <TableHead>Destination Channel ID</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredPairs.map((pair) => {
+                    const statusInfo = getStatusInfo(pair.status);
+                    return (
+                      <TableRow 
+                        key={pair.id} 
+                        className="border-border hover:bg-muted/20 transition-colors"
+                      >
+                        <TableCell className="font-medium">{pair.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {pair.sourceChannelId}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {pair.destinationChannelId}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${statusInfo.bgColor}`}></div>
+                            <span className="capitalize text-sm">{statusInfo.label}</span>
+                            {pair.advancedFilters && (
+                              <Badge variant="outline" className="text-xs">
+                                Filtered
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditPair(pair.id)}
+                                  aria-label={`Edit pair ${pair.name}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleStatus(pair.id)}
+                                  aria-label={`${pair.status === "active" ? "Pause" : "Resume"} pair ${pair.name}`}
+                                >
+                                  {pair.status === "active" ? (
+                                    <Pause className="w-4 h-4" />
+                                  ) : (
+                                    <Play className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{pair.status === "active" ? "Pause" : "Resume"} pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeletePair(pair.id)}
+                                  aria-label={`Delete pair ${pair.name}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete pair</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {/* Add Pair Modal */}
       <AddPairModal
